@@ -82,7 +82,6 @@ class _HomeScreenState extends State<HomeScreen> {
       int index = list.indexWhere((task) => task.id == updateTask.id);
 
       if (index != -1) {
-        // Nếu tìm thấy, cập nhật task tại vị trí đó
         list[index] = updateTask;
       }
     });

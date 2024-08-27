@@ -104,19 +104,19 @@ class _DialogAddOrUpdateState extends State<DialogAddOrUpdate> {
               {
                 widget.addTask(widget.isUpdate
                     ? Task(
-                        widget.task!.id, // Get ID Task
-                        _content, // Nội dung công việc
-                        DateTime.now(), // Thời gian hiện tại
-                        _isStatus!, // Trạng thái công việc
+                        widget.task!.id, 
+                        _content,
+                        DateTime.now(), 
+                        _isStatus!, 
                       )
                     : Task(
-                        Random().nextInt(100) + 50, // Tạo ID ngẫu nhiên
-                        _content, // Nội dung công việc
-                        DateTime.now(), // Thời gian hiện tại
-                        _isStatus!, // Trạng thái công việc
+                        Random().nextInt(100) + 50,
+                        _content,
+                        DateTime.now(),
+                        _isStatus!,
                       )),
                 Navigator.pop(
-                    context, 'OK') // Đóng dialog sau khi thêm công việc
+                    context, 'OK')
               }
           },
           child: const Text('OK'),
