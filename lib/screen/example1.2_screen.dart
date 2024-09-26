@@ -11,8 +11,8 @@ class _SecondScreendState extends State<SecondScreend> {
 
   bool _isSwitched = false;
 
-  ThemeData _dark = ThemeData(brightness: Brightness.dark);
-  ThemeData _light = ThemeData(brightness: Brightness.light);
+  final ThemeData _dark = ThemeData(brightness: Brightness.dark);
+  final ThemeData _light = ThemeData(brightness: Brightness.light);
 
   @override
   Widget build(BuildContext context) {
@@ -21,7 +21,7 @@ class _SecondScreendState extends State<SecondScreend> {
       theme: _isSwitched ? _light : _dark,
       home: Scaffold(
           appBar: AppBar(
-            title: Text('Example 1.2',
+            title: const Text('Example 1.2',
                 style: TextStyle(
                     color: Colors.white, fontWeight: FontWeight.bold)),
             backgroundColor: const Color.fromARGB(255, 39, 135, 213),
@@ -32,7 +32,7 @@ class _SecondScreendState extends State<SecondScreend> {
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                Text('Hello World ${_isSwitched ? 'Light' : 'Dark'}',
+                Text('Screen Color : ${_isSwitched ? 'Light' : 'Dark'}',
                     style: TextStyle(
                         color: _isSwitched ? Colors.black : Colors.white,
                         fontSize: 20,

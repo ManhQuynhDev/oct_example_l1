@@ -1,21 +1,17 @@
-import 'dart:math';
-
 import 'package:flutter/material.dart';
-
 import '../../data/model/Task.dart';
 
 class DialogAddOrUpdate extends StatefulWidget {
   final bool isUpdate;
-
   final Task? task;
-
   final Function addTask;
 
-  const DialogAddOrUpdate(
-      {super.key,
-      required this.addTask,
-      required this.isUpdate,
-      required this.task});
+  const DialogAddOrUpdate({
+    super.key,
+    required this.addTask,
+    required this.isUpdate,
+    required this.task,
+  });
 
   @override
   State<DialogAddOrUpdate> createState() => _DialogAddOrUpdateState();
@@ -24,6 +20,20 @@ class DialogAddOrUpdate extends StatefulWidget {
 class _DialogAddOrUpdateState extends State<DialogAddOrUpdate> {
   String _content = '';
   bool? _isStatus = false;
+  TimeOfDay? _selectedTime;
+
+  Future<void> _selectTime(BuildContext context) async {
+    final TimeOfDay? picked = await showTimePicker(
+      context: context,
+      initialTime: _selectedTime ?? TimeOfDay.now(),
+    );
+
+    if (picked != null) {
+      setState(() {
+        _selectedTime = picked;
+      });
+    }
+  }
 
   void _toggleCheckbox(bool? value) {
     setState(() {
@@ -39,11 +49,23 @@ class _DialogAddOrUpdateState extends State<DialogAddOrUpdate> {
     _contentController = TextEditingController(
       text: widget.isUpdate ? widget.task?.content : '',
     );
-    _isStatus = widget.task?.status;
 
-    setState(() {
-      _content = (widget.isUpdate ? widget.task?.content : '')!;
-    });
+    // Cập nhật checkBox
+    _isStatus = widget.task?.status == 0;
+
+    // Xử lý thời gian nếu có
+    if (widget.task?.time != null) {
+      _selectedTime = _parseTimeOfDay(widget.task!.time);
+    }
+
+    _content = widget.task?.content ?? '';
+  }
+
+  TimeOfDay _parseTimeOfDay(String timeString) {
+    final parts = timeString.split(':');
+    final hour = int.parse(parts[0].trim());
+    final minute = int.parse(parts[1].trim());
+    return TimeOfDay(hour: hour, minute: minute);
   }
 
   @override
@@ -54,13 +76,15 @@ class _DialogAddOrUpdateState extends State<DialogAddOrUpdate> {
 
   @override
   Widget build(BuildContext context) {
+    Size size = MediaQuery.of(context).size;
     String title = widget.isUpdate ? 'Update Task' : 'Add Task';
+
     return AlertDialog(
       title: Text(title),
-      content: Container(
-        height: 110,
+      content: SizedBox(
+        height: size.height * 0.2,
         child: Column(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          mainAxisAlignment: MainAxisAlignment.spaceAround,
           children: [
             TextField(
               controller: _contentController,
@@ -68,9 +92,11 @@ class _DialogAddOrUpdateState extends State<DialogAddOrUpdate> {
                 _content = value;
               }),
               decoration: InputDecoration(
-                  labelText: 'Content',
-                  border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(8.0))),
+                labelText: 'Content',
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(8.0),
+                ),
+              ),
             ),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -80,12 +106,35 @@ class _DialogAddOrUpdateState extends State<DialogAddOrUpdate> {
                   style: TextStyle(fontWeight: FontWeight.w600),
                 ),
                 Checkbox(
-                    value: _isStatus,
-                    tristate: true,
-                    activeColor: Colors.blue,
-                    onChanged: _toggleCheckbox)
+                  value: _isStatus,
+                  tristate: false,
+                  activeColor: Colors.blue,
+                  onChanged: _toggleCheckbox,
+                ),
               ],
-            )
+            ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  'Time: ${_selectedTime?.format(context) ?? "Not set"}',
+                  style: const TextStyle(fontWeight: FontWeight.w600),
+                ),
+                ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.blue,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                  ),
+                  onPressed: () => _selectTime(context),
+                  child: const Icon(
+                    Icons.timer,
+                    color: Colors.white,
+                  ),
+                ),
+              ],
+            ),
           ],
         ),
       ),
@@ -95,29 +144,29 @@ class _DialogAddOrUpdateState extends State<DialogAddOrUpdate> {
           child: const Text('Cancel'),
         ),
         TextButton(
-          onPressed: () => {
-            if (_content.isEmpty)
-              {
-                print('Empty')
-              }
-            else
-              {
-                widget.addTask(widget.isUpdate
+          onPressed: () {
+            if (_content.isEmpty) {
+              print('Content is empty');
+            } else {
+              widget.addTask(
+                widget.isUpdate
                     ? Task(
-                        widget.task!.id, 
-                        _content,
-                        DateTime.now(), 
-                        _isStatus!, 
+                        id: widget.task!.id,
+                        content: _content,
+                        time:
+                            '${_selectedTime?.hour}:${_selectedTime?.minute}',
+                        status: _isStatus! ? 0 : 1,
                       )
                     : Task(
-                        Random().nextInt(100) + 50,
-                        _content,
-                        DateTime.now(),
-                        _isStatus!,
-                      )),
-                Navigator.pop(
-                    context, 'OK')
-              }
+                        id: null,
+                        content: _content,
+                        time:
+                            '${_selectedTime?.hour}:${_selectedTime?.minute}',
+                        status: _isStatus! ? 0 : 1,
+                      ),
+              );
+              Navigator.pop(context, 'OK');
+            }
           },
           child: const Text('OK'),
         ),

@@ -7,29 +7,44 @@ class TaskItem extends StatefulWidget {
 
   final Function deleteTask;
 
-  TaskItem({required this.task, required this.deleteTask});
+  final Function updateTask;
+
+  TaskItem(
+      {required this.task, required this.deleteTask, required this.updateTask});
 
   @override
   _TaskItemState createState() => _TaskItemState();
 }
 
 class _TaskItemState extends State<TaskItem> {
+  bool _isDone = false;
+
   @override
   void initState() {
     super.initState();
+    if (widget.task.status == 0) {
+      _isDone = true;
+    }
   }
 
   void _toggleCheckbox(bool? value) {
     setState(() {
-      widget.task.status = value ?? false;
+      _isDone = value ?? false;
     });
+    Task task = Task(
+        id: widget.task.id,
+        content: widget.task.content,
+        time: widget.task.time,
+        status: _isDone == true ? 0 : 1);
+    widget.updateTask(task);
   }
 
   @override
   Widget build(BuildContext context) {
-    return Container(
+
+    return SizedBox(
       width: double.infinity,
-      height: 65,
+      height: 75,
       child: Card(
         color: Color(0xFF74b9ff),
         child: Padding(
@@ -37,25 +52,36 @@ class _TaskItemState extends State<TaskItem> {
           child: Row(
             children: [
               Checkbox(
-                value: widget.task.status,
+                value: _isDone,
                 onChanged: _toggleCheckbox,
                 tristate: true,
                 activeColor: Colors.blue,
               ),
               Expanded(
-                child: Text(
-                  widget.task.content,
-                  style: TextStyle(
-                      decoration: widget.task.status
-                          ? TextDecoration.lineThrough
-                          : TextDecoration.none,
-                      decorationColor:
-                          widget.task.status ? Colors.grey : Colors.black,
-                      fontSize: 16,
-                      color: widget.task.status ? Colors.grey : Colors.black,
-                      fontWeight: FontWeight.w500),
-                ),
-              ),
+                  child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    widget.task.content,
+                    style: TextStyle(
+                        decoration: widget.task.status == 0
+                            ? TextDecoration.lineThrough
+                            : TextDecoration.none,
+                        decorationColor: widget.task.status == 0
+                            ? Colors.grey
+                            : Colors.black,
+                        fontSize: 18,
+                        color: widget.task.status == 0
+                            ? Colors.grey
+                            : Colors.black,
+                        fontWeight: FontWeight.w500),
+                  ),
+                  Text(
+                    'deadline ${widget.task.time}',
+                    style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w500),
+                  )
+                ],
+              )),
               IconButton(
                   onPressed: () {
                     _showDeleteConfirmationDialog(context);
@@ -90,10 +116,10 @@ class _TaskItemState extends State<TaskItem> {
         ),
         TextButton(
           onPressed: () => {
-            if (widget.task.status == true)
+            if (widget.task.status == 0)
               {
-                widget.task.status = false,
-                widget.deleteTask(widget.task),
+                widget.task.status = 1,
+                widget.deleteTask(widget.task.id),
                 Navigator.pop(context)
               }
             else
